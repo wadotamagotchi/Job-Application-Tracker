@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="topbar" aria-label="Application navigation">
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <span>JobTrack</span>
+        </a>
+        <div class="nav-actions">
+            <span class="user-chip">{{ session["username"] }}</span>
+            <a class="nav-link" href="{{ url_for('logout') }}">Sign out</a>
+            <button class="theme-toggle" type="button" aria-label="Switch color theme" data-theme-toggle>
+                <span class="theme-toggle-icon" aria-hidden="true"></span>
+                <span data-theme-label>Dark</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="app-shell form-shell">
+        <header class="form-header">
+            <div>
+                <p class="eyebrow">Update application</p>
+                <h1>Edit Application</h1>
+                <p class="lede">Keep every application current as your hiring process changes.</p>
+            </div>
+            <a class="button secondary-button" href="{{ url_for('index') }}">Back to dashboard</a>
+        </header>
+
+        <!-- If app.py found the selected application, fill the form with its current data. -->
+        {% if application %}
+            <form method="POST" class="form-card">
+                <div class="form-banner" aria-hidden="true">
+                    <span class="banner-icon edit-icon"></span>
+                    <div class="banner-lines">
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <label>
+                        <span>Company</span>
+                        <input type="text" name="company" value="{{ application['company'] }}" required>
+                    </label>
+
+                    <label>
+                        <span>Position</span>
+                        <input type="text" name="position" value="{{ application['position'] }}" required>
+                    </label>
+
+                    <label>
+                        <span>Status</span>
+                        <select name="status" required>
+                            <!-- Mark the current status as selected in the dropdown. -->
+                            {% for status in ["Applied", "Interview", "Offer", "Rejected"] %}
+                                <option value="{{ status }}" {% if application['status'] == status %}selected{% endif %}>{{ status }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>Date Applied</span>
+                        <input type="date" name="date_applied" value="{{ application['date_applied'] }}" required>
+                    </label>
+                </div>
+
+                <label>
+                    <span>Notes</span>
+                    <textarea name="notes" rows="5">{{ application['notes'] or '' }}</textarea>
+                </label>
+
+                <div class="form-actions">
+                    <a class="button secondary-button" href="{{ url_for('index') }}">Cancel</a>
+                    <button class="button primary-button" type="submit">Update application</button>
+                </div>
+            </form>
+        <!-- This appears if someone tries to edit an id that does not exist. -->
+        {% else %}
+            <section class="empty-state">
+                <span class="empty-icon warning-icon"></span>
+                <h2>Application not found</h2>
+                <p>This application may have already been deleted.</p>
+                <a class="button primary-button" href="{{ url_for('index') }}">Return home</a>
+            </section>
+        {% endif %}
+    </main>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

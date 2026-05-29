@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="topbar" aria-label="Application navigation">
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <span>JobTrack</span>
+        </a>
+        <div class="nav-actions">
+            <span class="user-chip">{{ session["username"] }}</span>
+            <a class="nav-link" href="{{ url_for('logout') }}">Sign out</a>
+            <button class="theme-toggle" type="button" aria-label="Switch color theme" data-theme-toggle>
+                <span class="theme-toggle-icon" aria-hidden="true"></span>
+                <span data-theme-label>Dark</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="app-shell">
+        <section class="hero-panel">
+            <div class="hero-copy">
+                <p class="eyebrow">Application dashboard</p>
+                <h1>Welcome back, {{ session["username"] }}</h1>
+                <p class="lede">Track companies, roles, dates, notes, and hiring progress in one focused workspace.</p>
+                <div class="hero-actions">
+                    <a class="button primary-button" href="{{ url_for('add_application') }}">Add application</a>
+                </div>
+            </div>
+            <div class="hero-graphic" aria-hidden="true">
+                <div class="mock-window">
+                    <div class="mock-toolbar">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="mock-content">
+                        <div class="mock-row">
+                            <span class="mock-company"></span>
+                            <span class="mock-pill blue"></span>
+                        </div>
+                        <div class="mock-row">
+                            <span class="mock-company short"></span>
+                            <span class="mock-pill amber"></span>
+                        </div>
+                        <div class="mock-row">
+                            <span class="mock-company"></span>
+                            <span class="mock-pill green"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-grid" aria-label="Application statistics">
+            <article class="stat-card">
+                <span class="stat-icon total-icon"></span>
+                <span class="stat-label">Total</span>
+                <strong>{{ applications|length }}</strong>
+            </article>
+            <article class="stat-card">
+                <span class="stat-icon applied-icon"></span>
+                <span class="stat-label">Applied</span>
+                <strong>{{ status_counts["Applied"] }}</strong>
+            </article>
+            <article class="stat-card">
+                <span class="stat-icon interview-icon"></span>
+                <span class="stat-label">Interview</span>
+                <strong>{{ status_counts["Interview"] }}</strong>
+            </article>
+            <article class="stat-card">
+                <span class="stat-icon offer-icon"></span>
+                <span class="stat-label">Offers</span>
+                <strong>{{ status_counts["Offer"] }}</strong>
+            </article>
+        </section>
+
+        <section class="pipeline-panel" aria-label="Hiring pipeline">
+            <div class="pipeline-step active">
+                <span class="pipeline-dot"></span>
+                <div>
+                    <strong>Applied</strong>
+                    <small>{{ status_counts["Applied"] }} saved</small>
+                </div>
+            </div>
+            <div class="pipeline-line"></div>
+            <div class="pipeline-step active">
+                <span class="pipeline-dot"></span>
+                <div>
+                    <strong>Interview</strong>
+                    <small>{{ status_counts["Interview"] }} in progress</small>
+                </div>
+            </div>
+            <div class="pipeline-line"></div>
+            <div class="pipeline-step">
+                <span class="pipeline-dot"></span>
+                <div>
+                    <strong>Offer</strong>
+                    <small>{{ status_counts["Offer"] }} received</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flask sends "applications" from app.py. If it has rows, show the table. -->
+        {% if applications %}
+            <section class="panel">
+                <div class="section-header">
+                    <div>
+                        <h2>Applications</h2>
+                        <p>Most recent applications appear first.</p>
+                    </div>
+                </div>
+
+                <div class="table-wrap" aria-label="Job applications">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Position</th>
+                                <th>Status</th>
+                                <th>Date Applied</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Repeat one table row for each application from the database. -->
+                            {% for application in applications %}
+                                <tr>
+                                    <td data-label="Company">
+                                        <strong>{{ application["company"] }}</strong>
+                                    </td>
+                                    <td data-label="Position">{{ application["position"] }}</td>
+                                    <td data-label="Status">
+                                        <span class="status status-{{ application['status']|lower }}">{{ application["status"] }}</span>
+                                    </td>
+                                    <td data-label="Date Applied">{{ application["date_applied"] }}</td>
+                                    <td data-label="Notes" class="notes-cell">{{ application["notes"] or "-" }}</td>
+                                    <td data-label="Actions" class="actions">
+                                        <a class="text-action" href="{{ url_for('edit_application', application_id=application['id']) }}">Edit</a>
+                                        <form method="POST" action="{{ url_for('delete_application', application_id=application['id']) }}" class="inline-form" onsubmit="return confirm('Delete this application?');">
+                                            <button class="text-action danger" type="submit">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        <!-- If there are no saved applications yet, show a friendly empty message. -->
+        {% else %}
+            <section class="empty-state">
+                <span class="empty-icon"></span>
+                <h2>No applications yet</h2>
+                <p>Add your first job application and start building a clear record of your search.</p>
+                <a class="button primary-button" href="{{ url_for('add_application') }}">Add application</a>
+            </section>
+        {% endif %}
+    </main>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

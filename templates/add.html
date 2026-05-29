@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="topbar" aria-label="Application navigation">
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <span>JobTrack</span>
+        </a>
+        <div class="nav-actions">
+            <span class="user-chip">{{ session["username"] }}</span>
+            <a class="nav-link" href="{{ url_for('logout') }}">Sign out</a>
+            <button class="theme-toggle" type="button" aria-label="Switch color theme" data-theme-toggle>
+                <span class="theme-toggle-icon" aria-hidden="true"></span>
+                <span data-theme-label>Dark</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="app-shell form-shell">
+        <header class="form-header">
+            <div>
+                <p class="eyebrow">New application</p>
+                <h1>Add Application</h1>
+                <p class="lede">Save the role details while they are fresh so follow-ups are easier later.</p>
+            </div>
+            <a class="button secondary-button" href="{{ url_for('index') }}">Back to dashboard</a>
+        </header>
+
+        <!-- POST sends the form data back to the /add route in app.py. -->
+        <form method="POST" class="form-card">
+            <div class="form-banner" aria-hidden="true">
+                <span class="banner-icon"></span>
+                <div class="banner-lines">
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <label>
+                    <span>Company</span>
+                    <input type="text" name="company" placeholder="Example: Acme Corp" required>
+                </label>
+
+                <label>
+                    <span>Position</span>
+                    <input type="text" name="position" placeholder="Example: Junior Developer" required>
+                </label>
+
+                <label>
+                    <span>Status</span>
+                    <select name="status" required>
+                        <option value="Applied">Applied</option>
+                        <option value="Interview">Interview</option>
+                        <option value="Offer">Offer</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>Date Applied</span>
+                    <input type="date" name="date_applied" required>
+                </label>
+            </div>
+
+            <label>
+                <span>Notes</span>
+                <textarea name="notes" rows="5" placeholder="Recruiter name, job link, interview schedule, or follow-up reminders"></textarea>
+            </label>
+
+            <div class="form-actions">
+                <a class="button secondary-button" href="{{ url_for('index') }}">Cancel</a>
+                <button class="button primary-button" type="submit">Save application</button>
+            </div>
+        </form>
+    </main>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>
