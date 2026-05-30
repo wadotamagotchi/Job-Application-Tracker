@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In</title>
+    <title>Verify Account</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -13,7 +13,7 @@
             <span>JobTrack</span>
         </a>
         <div class="nav-actions">
-            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+            <a class="nav-link" href="{{ url_for('login') }}">Sign in</a>
             <button class="theme-toggle" type="button" aria-label="Switch color theme" data-theme-toggle>
                 <span class="theme-toggle-icon" aria-hidden="true"></span>
                 <span data-theme-label>Dark</span>
@@ -25,8 +25,9 @@
         <section class="auth-panel">
             <form method="POST" class="form-card auth-card">
                 <div>
-                    <p class="eyebrow">Welcome back</p>
-                    <h2>Sign In</h2>
+                    <p class="eyebrow">Email verification</p>
+                    <h2>Enter Verification Code</h2>
+                    <p class="auth-help">We sent a 6-digit code to {{ email }}.</p>
                 </div>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -40,17 +41,17 @@
                 {% endwith %}
 
                 <label>
-                    <span>Email</span>
-                    <input type="email" name="email" autocomplete="email" required>
+                    <span>Verification Code</span>
+                    <input type="text" name="verification_code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
                 </label>
 
-                <label>
-                    <span>Password</span>
-                    <input type="password" name="password" autocomplete="current-password" required>
-                </label>
+                <button class="button primary-button" type="submit">Verify account</button>
+            </form>
 
-                <button class="button primary-button" type="submit">Sign in</button>
-                <p class="auth-switch">No account yet? <a href="{{ url_for('register') }}">Create one</a></p>
+            <form method="POST" action="{{ url_for('resend_code') }}" class="auth-secondary-action">
+                <button class="text-action" type="submit">Resend code</button>
+                <span>or</span>
+                <a href="{{ url_for('register') }}">create a new account</a>
             </form>
         </section>
     </main>

@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
+from sqlalchemy import func, inspect, text
 
 
 db = SQLAlchemy()
@@ -9,8 +9,11 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    verification_code = db.Column(db.String(6))
+    is_verified = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, server_default=func.now())
 
     applications = db.relationship(
@@ -42,18 +45,29 @@ def init_database(app):
 
     with app.app_context():
         db.create_all()
+        inspector = inspect(db.engine)
 
-        if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite:///"):
-            inspector = db.inspect(db.engine)
+        if "users" in inspector.get_table_names():
+            user_columns = [
+                column["name"]
+                for column in inspector.get_columns("users")
+            ]
 
-            if "applications" in inspector.get_table_names():
-                columns = [
-                    column["name"]
-                    for column in inspector.get_columns("applications")
-                ]
+            with db.engine.begin() as connection:
+                if "email" not in user_columns:
+                    connection.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR(255)"))
+                if "verification_code" not in user_columns:
+                    connection.execute(text("ALTER TABLE users ADD COLUMN verification_code VARCHAR(6)"))
+                if "is_verified" not in user_columns:
+                    connection.execute(text("ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT false"))
+                    connection.execute(text("UPDATE users SET is_verified = true WHERE is_verified IS NULL"))
 
-                if "user_id" not in columns:
-                    with db.engine.begin() as connection:
-                        connection.exec_driver_sql(
-                            "ALTER TABLE applications ADD COLUMN user_id INTEGER"
-                        )
+        if "applications" in inspector.get_table_names():
+            application_columns = [
+                column["name"]
+                for column in inspector.get_columns("applications")
+            ]
+
+            if "user_id" not in application_columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE applications ADD COLUMN user_id INTEGER"))
