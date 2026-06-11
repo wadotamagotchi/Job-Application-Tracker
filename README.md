@@ -8,7 +8,7 @@ This project was built as a portfolio-ready full-stack web app. Users can create
 
 Deployed on Render:
 
-https://job-application-tracker-40oj.onrender.com
+https://job-application-tracker-400j.onrender.com
 
 ## Features
 
